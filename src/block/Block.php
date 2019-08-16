@@ -672,12 +672,24 @@ class Block{
 	final public function getCollisionBoxes() : array{
 		if($this->collisionBoxes === null){
 			$this->collisionBoxes = $this->recalculateCollisionBoxes();
+			$extraOffset = $this->getPosOffset();
+			$offset = $extraOffset !== null ? $this->pos->add($extraOffset) : $this->pos;
 			foreach($this->collisionBoxes as $bb){
-				$bb->offset($this->pos->x, $this->pos->y, $this->pos->z);
+				$bb->offset($offset->x, $offset->y, $offset->z);
 			}
 		}
 
 		return $this->collisionBoxes;
+	}
+
+	/**
+	 * Returns an additional fractional vector to shift the block's effective position by based on the current position.
+	 * Used to randomize position of things like bamboo canes and tall grass.
+	 *
+	 * @return Vector3|null
+	 */
+	public function getPosOffset() : ?Vector3{
+		return null;
 	}
 
 	/**
