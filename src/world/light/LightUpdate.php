@@ -67,6 +67,8 @@ abstract class LightUpdate{
 
 	abstract public function recalculateNode(int $x, int $y, int $z) : void;
 
+	abstract public function recalculateChunk(int $chunkX, int $chunkZ) : void;
+
 	protected function getEffectiveLight(int $x, int $y, int $z) : int{
 		if($this->subChunkHandler->moveTo($x, $y, $z, false)){
 			return $this->currentLightArray->get($x & 0xf, $y & 0xf, $z & 0xf);

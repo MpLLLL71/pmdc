@@ -24,6 +24,7 @@ declare(strict_types=1);
 namespace pocketmine\world\light;
 
 use pocketmine\block\BlockFactory;
+use pocketmine\world\format\LightArray;
 use function max;
 
 class BlockLightUpdate extends LightUpdate{
@@ -34,5 +35,37 @@ class BlockLightUpdate extends LightUpdate{
 	public function recalculateNode(int $x, int $y, int $z) : void{
 		$block = $this->world->getBlockAt($x, $y, $z);
 		$this->setAndUpdateLight($x, $y, $z, max($block->getLightLevel(), $this->getHighestAdjacentLight($x, $y, $z) - BlockFactory::$lightFilter[$block->getFullId()]));
+	}
+
+	public function recalculateChunk(int $chunkX, int $chunkZ) : void{
+		$chunk = $this->world->getChunk($chunkX, $chunkZ);
+		if($chunk === null){
+			throw new \InvalidArgumentException("Cannot recalculate light for nonexisting chunk");
+		}
+
+		foreach($chunk->getSubChunks() as $chunkY => $subChunk){
+			$subChunk->setBlockLightArray(LightArray::fill(0));
+			if($subChunk->isEmptyFast()){
+				continue;
+			}
+
+			for($x = 0; $x < 16; ++$x){
+				for($z = 0; $z < 16; ++$z){
+					for($y = 0; $y < 16; ++$y){
+						//TODO: block layers make this far more complicated
+
+						$blockLight = BlockFactory::$lightLevel[$subChunk->getFullBlock($x, $y, $z)];
+						if($blockLight > 0){
+							$this->setAndUpdateLight(
+								($chunkX << 4) | $x,
+								($chunkY << 4) | $y,
+								($chunkZ << 4) | $z,
+								$blockLight
+							);
+						}
+					}
+				}
+			}
+		}
 	}
 }

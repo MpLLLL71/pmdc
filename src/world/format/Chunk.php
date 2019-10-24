@@ -26,7 +26,6 @@ declare(strict_types=1);
 
 namespace pocketmine\world\format;
 
-use pocketmine\block\BlockFactory;
 use pocketmine\block\BlockLegacyIds;
 use pocketmine\block\tile\Tile;
 use pocketmine\block\tile\TileFactory;
@@ -295,69 +294,6 @@ class Chunk{
 	 */
 	public function setHeightMap(int $x, int $z, int $value) : void{
 		$this->heightMap[($z << 4) | $x] = $value;
-	}
-
-	/**
-	 * Recalculates the heightmap for the whole chunk.
-	 */
-	public function recalculateHeightMap() : void{
-		for($z = 0; $z < 16; ++$z){
-			for($x = 0; $x < 16; ++$x){
-				$this->recalculateHeightMapColumn($x, $z);
-			}
-		}
-	}
-
-	/**
-	 * Recalculates the heightmap for the block column at the specified X/Z chunk coordinates
-	 *
-	 * @param int $x 0-15
-	 * @param int $z 0-15
-	 *
-	 * @return int New calculated heightmap value (0-256 inclusive)
-	 */
-	public function recalculateHeightMapColumn(int $x, int $z) : int{
-		$max = $this->getHighestBlockAt($x, $z);
-		for($y = $max; $y >= 0; --$y){
-			if(BlockFactory::$lightFilter[$state = $this->getFullBlock($x, $y, $z)] > 1 or BlockFactory::$diffusesSkyLight[$state]){
-				break;
-			}
-		}
-
-		$this->setHeightMap($x, $z, $y + 1);
-		return $y + 1;
-	}
-
-	/**
-	 * Performs basic sky light population on the chunk.
-	 * This does not cater for adjacent sky light, this performs direct sky light population only. This may cause some strange visual artifacts
-	 * if the chunk is light-populated after being terrain-populated.
-	 *
-	 * TODO: fast adjacent light spread
-	 */
-	public function populateSkyLight() : void{
-		$this->setAllBlockSkyLight(0);
-
-		for($x = 0; $x < 16; ++$x){
-			for($z = 0; $z < 16; ++$z){
-				$heightMap = $this->getHeightMap($x, $z);
-
-				for($y = ($this->subChunks->count() * 16) - 1; $y >= $heightMap; --$y){
-					$this->setBlockSkyLight($x, $y, $z, 15);
-				}
-
-				$light = 15;
-				for(; $y >= 0; --$y){
-					if($light > 0){
-						$light -= BlockFactory::$lightFilter[$this->getFullBlock($x, $y, $z)];
-						if($light <= 0){
-							break;
-						}
-					}
-					$this->setBlockSkyLight($x, $y, $z, $light);
-				}
-			}
-		}
 	}
 
 	/**

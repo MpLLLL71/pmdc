@@ -64,6 +64,8 @@ class BlockFactory{
 	private static $fullList = null;
 
 	/** @var \SplFixedArray|int[] */
+	public static $lightLevel = null;
+	/** @var \SplFixedArray|int[] */
 	public static $lightFilter = null;
 	/** @var \SplFixedArray|bool[] */
 	public static $diffusesSkyLight = null;
@@ -79,6 +81,7 @@ class BlockFactory{
 
 		self::$fullList = new \SplFixedArray(8192);
 
+		self::$lightLevel = \SplFixedArray::fromArray(array_fill(0, 8192, 0));
 		self::$lightFilter = \SplFixedArray::fromArray(array_fill(0, 8192, 1));
 		self::$diffusesSkyLight = \SplFixedArray::fromArray(array_fill(0, 8192, false));
 		self::$blastResistance = \SplFixedArray::fromArray(array_fill(0, 8192, 0));
@@ -821,6 +824,7 @@ class BlockFactory{
 
 	private static function fillStaticArrays(int $index, Block $block) : void{
 		self::$fullList[$index] = $block;
+		self::$lightLevel[$index] = $block->getLightLevel();
 		self::$lightFilter[$index] = min(15, $block->getLightFilter() + 1); //opacity plus 1 standard light filter
 		self::$diffusesSkyLight[$index] = $block->diffusesSkyLight();
 		self::$blastResistance[$index] = $block->getBreakInfo()->getBlastResistance();
