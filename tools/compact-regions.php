@@ -52,7 +52,8 @@ const SUPPORTED_EXTENSIONS = [
 ];
 
 /**
- * @param string[] $files
+ * @param int[] $files
+ * @phpstan-param array<string, int> $files
  */
 function find_regions_recursive(string $dir, array &$files) : void{
 	foreach(scandir($dir, SCANDIR_SORT_NONE) as $file){
@@ -64,7 +65,7 @@ function find_regions_recursive(string $dir, array &$files) : void{
 			in_array(pathinfo($fullPath, PATHINFO_EXTENSION), SUPPORTED_EXTENSIONS, true) and
 			is_file($fullPath)
 		){
-			$files[] = $fullPath;
+			$files[$fullPath] = filesize($fullPath);
 		}elseif(is_dir($fullPath)){
 			find_regions_recursive($fullPath, $files);
 		}
@@ -82,9 +83,10 @@ function main(array $argv) : int{
 
 	$logger = \GlobalLogger::get();
 
+	/** @phpstan-var array<string, int> $files */
 	$files = [];
 	if(is_file($argv[1])){
-		$files[] = $argv[1];
+		$files[$argv[1]] = filesize($argv[1]);
 	}elseif(is_dir($argv[1])){
 		find_regions_recursive($argv[1], $files);
 	}
@@ -92,15 +94,16 @@ function main(array $argv) : int{
 		echo "No supported files found\n";
 		return 1;
 	}
-	$currentSize = 0;
-	foreach($files as $file){
-		$currentSize += filesize($file);
-	}
+
+	arsort($files, SORT_NUMERIC);
+	$currentSize = array_sum($files);
 	$logger->info("Discovered " . count($files) . " files totalling " . number_format($currentSize) . " bytes");
 	$logger->warning("Please DO NOT forcibly kill the compactor, or your files may be damaged.");
 
 	$corruptedFiles = [];
-	foreach($files as $file){
+	$doneCount = 0;
+	$totalCount = count($files);
+	foreach($files as $file => $size){
 		$newFile = $file . ".compacted";
 		$oldRegion = new RegionLoader($file);
 		$oldRegion->open();
@@ -138,12 +141,13 @@ function main(array $argv) : int{
 		}else{
 			unlink($newFile);
 		}
-		$logger->info("Compacted region $file");
+		$doneCount++;
+		$logger->info("Compacted region $file ($doneCount/$totalCount, " . round(($doneCount / $totalCount) * 100, 2) . "%)");
 	}
 
 	clearstatcache();
 	$newSize = 0;
-	foreach($files as $file){
+	foreach($files as $file => $oldSize){
 		$newSize += file_exists($file) ? filesize($file) : 0;
 	}
 	$diff = $currentSize - $newSize;
