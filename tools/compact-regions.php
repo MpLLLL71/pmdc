@@ -123,6 +123,7 @@ function main(array $argv) : int{
 		}else{
 			unlink($newFile);
 		}
+		$logger->info("Compacted region $file");
 	}
 
 	clearstatcache();
