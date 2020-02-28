@@ -96,6 +96,7 @@ function main(array $argv) : int{
 		$currentSize += filesize($file);
 	}
 	$logger->info("Discovered " . count($files) . " files totalling " . number_format($currentSize) . " bytes");
+	$logger->warning("Please DO NOT forcibly kill the compactor, or your files may be damaged.");
 
 	foreach($files as $file){
 		$newFile = $file . ".compacted";
