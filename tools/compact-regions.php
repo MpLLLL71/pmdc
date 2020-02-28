@@ -24,6 +24,7 @@ declare(strict_types=1);
 namespace pocketmine\tools\compact_regions;
 
 use pocketmine\world\format\io\region\RegionLoader;
+use pocketmine\world\format\io\exception\CorruptedChunkException;
 use function clearstatcache;
 use function count;
 use function defined;
@@ -98,6 +99,7 @@ function main(array $argv) : int{
 	$logger->info("Discovered " . count($files) . " files totalling " . number_format($currentSize) . " bytes");
 	$logger->warning("Please DO NOT forcibly kill the compactor, or your files may be damaged.");
 
+	$corruptedFiles = [];
 	foreach($files as $file){
 		$newFile = $file . ".compacted";
 		$oldRegion = new RegionLoader($file);
@@ -106,9 +108,16 @@ function main(array $argv) : int{
 		$newRegion->open();
 
 		$emptyRegion = true;
+		$corruption = false;
 		for($x = 0; $x < 32; $x++){
 			for($z = 0; $z < 32; $z++){
-				$data = $oldRegion->readChunk($x, $z);
+				try{
+					$data = $oldRegion->readChunk($x, $z);
+				}catch(CorruptedChunkException $e){
+					$logger->error("Damaged chunk $x $z in file $file (" . $e->getMessage() . "), skipping");
+					$corruption = true;
+					continue;
+				}
 				if($data !== null){
 					$emptyRegion = false;
 					$newRegion->writeChunk($x, $z, $data);
@@ -118,7 +127,12 @@ function main(array $argv) : int{
 
 		$oldRegion->close();
 		$newRegion->close();
-		unlink($file);
+		if(!$corruption){
+			unlink($file);
+		}else{
+			rename($file, $file . ".bak");
+			$corruptedFiles[] = $file . ".bak";
+		}
 		if(!$emptyRegion){
 			rename($newFile, $file);
 		}else{
@@ -134,6 +148,13 @@ function main(array $argv) : int{
 	}
 	$diff = $currentSize - $newSize;
 	$logger->info("Finished compaction of " . count($files) . " files. Freed " . number_format($diff) . " bytes of space (" . round(($diff / $currentSize) * 100, 2) . "% reduction).");
+	if(count($corruptedFiles) > 0){
+		$logger->error("The following backup files were not removed due to corruption detected:");
+		foreach($corruptedFiles as $file){
+			echo $file . "\n";
+		}
+		return 1;
+	}
 	return 0;
 }
 
