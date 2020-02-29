@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\tools\compact_regions;
 
+use pocketmine\world\format\io\region\CorruptedRegionException;
 use pocketmine\world\format\io\region\RegionLoader;
 use pocketmine\world\format\io\exception\CorruptedChunkException;
 use function clearstatcache;
@@ -104,9 +105,17 @@ function main(array $argv) : int{
 	$doneCount = 0;
 	$totalCount = count($files);
 	foreach($files as $file => $size){
-		$newFile = $file . ".compacted";
 		$oldRegion = new RegionLoader($file);
-		$oldRegion->open();
+		try{
+			$oldRegion->open();
+		}catch(CorruptedRegionException $e){
+			$logger->error("Damaged region in file $file (" . $e->getMessage() . "), skipping");
+			$corruptedFiles[] = $file;
+			$doneCount++;
+			continue;
+		}
+
+		$newFile = $file . ".compacted";
 		$newRegion = new RegionLoader($newFile);
 		$newRegion->open();
 
