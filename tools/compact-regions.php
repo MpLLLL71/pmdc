@@ -23,9 +23,11 @@ declare(strict_types=1);
 
 namespace pocketmine\tools\compact_regions;
 
+use pocketmine\world\format\io\exception\CorruptedChunkException;
 use pocketmine\world\format\io\region\CorruptedRegionException;
 use pocketmine\world\format\io\region\RegionLoader;
-use pocketmine\world\format\io\exception\CorruptedChunkException;
+use function array_sum;
+use function arsort;
 use function clearstatcache;
 use function count;
 use function defined;
