@@ -1,0 +1,46 @@
+on: [push, pull_request]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Cache
+      uses: actions/cache@v1.1.2
+      with:
+        # A directory to store and save the cache
+        path: ./bin
+        # An explicit key for restoring and saving the cache
+        key: php-${{ runner.os }}-${{ hashFiles('./build/php/compile.sh') }}
+
+    - name: Setup PHP
+      run: >-
+        if [ -d ./bin ]; then
+          echo "Using cached PHP build
+        else
+          echo "Compiling PHP without cache"
+          ./build/php/compile.sh -fu -j8
+        fi
+
+    - name: Configure environment
+      run: export PATH=$(pwd)/bin/php7/bin:$PATH
+
+    - name: Validate composer.json and composer.lock
+      run: composer validate
+
+    - name: Install dependencies
+      run: composer install --prefer-dist --no-progress --no-suggest
+
+    - name: Run PHPStan
+      run: ./vendor/bin/phpstan analyze --no-progress --memory-limit=2G
+    
+    - name: Run PHPUnit
+      run: ./vendor/bin/phpunit --bootstrap vendor/autoload.php --fail-on-warning tests/phpunit
+    
+    - name: Build & Run
+      run: >-
+        composer install --prefer-dist --no-progress --no-suggest --no-dev
+        ./tests/travis.sh -t4
