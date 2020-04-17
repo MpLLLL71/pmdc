@@ -25,7 +25,7 @@ jobs:
         else
           echo "Compiling PHP without cache"
           sudo apt update
-          sudo apt install make autoconf automake libtool m4 wget gzip bzip2 bison g++ git cmake pkg-config libc-bin -y
+          sudo apt install make autoconf automake libtool libtool-bin m4 wget gzip bzip2 bison g++ git cmake pkg-config libc-bin -y
           ./build/php/compile.sh -fu -j8
         fi
 
