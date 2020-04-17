@@ -19,7 +19,7 @@ jobs:
     - name: Setup PHP
       run: >-
         if [ -d ./bin ]; then
-          echo "Using cached PHP build
+          echo "Using cached PHP build"
         else
           echo "Compiling PHP without cache"
           ./build/php/compile.sh -fu -j8
