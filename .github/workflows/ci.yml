@@ -24,8 +24,8 @@ jobs:
           echo "Using cached PHP build"
         else
           echo "Compiling PHP without cache"
-          apt update
-          apt install make autoconf automake libtool m4 wget getconf gzip bzip2 bison g++ git cmake pkg-config
+          sudo apt update
+          sudo apt install make autoconf automake libtool m4 wget getconf gzip bzip2 bison g++ git cmake pkg-config -y
           ./build/php/compile.sh -fu -j8
         fi
 
