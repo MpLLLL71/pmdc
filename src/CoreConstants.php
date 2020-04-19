@@ -33,5 +33,5 @@ if(defined('pocketmine\_CORE_CONSTANTS_INCLUDED')){
 }
 define('pocketmine\_CORE_CONSTANTS_INCLUDED', true);
 
-define('pocketmine\PATH', dirname(__DIR__, 2) . '/');
-define('pocketmine\RESOURCE_PATH', __DIR__ . '/resources/');
+define('pocketmine\PATH', dirname(__DIR__) . '/');
+define('pocketmine\RESOURCE_PATH', dirname(__DIR__) . '/resources/');

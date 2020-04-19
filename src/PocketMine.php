@@ -176,7 +176,7 @@ namespace pocketmine {
 		if(isset($opts["bootstrap"])){
 			$bootstrap = ($real = realpath($opts["bootstrap"])) !== false ? $real : $opts["bootstrap"];
 		}else{
-			$bootstrap = dirname(__FILE__, 3) . '/vendor/autoload.php';
+			$bootstrap = dirname(__FILE__, 2) . '/vendor/autoload.php';
 		}
 		define('pocketmine\COMPOSER_AUTOLOADER_PATH', $bootstrap);
 

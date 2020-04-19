@@ -4,9 +4,9 @@ parameters:
 		-
 			message: "#^Used constant LEVELDB_ZLIB_RAW_COMPRESSION not found\\.$#"
 			count: 1
-			path: ../../../src/pocketmine/level/format/io/leveldb/LevelDB.php
+			path: ../../../src/level/format/io/leveldb/LevelDB.php
 
 		-
 			message: "#^Constant LEVELDB_ZLIB_RAW_COMPRESSION not found\\.$#"
 			count: 1
-			path: ../../../src/pocketmine/level/format/io/leveldb/LevelDB.php
+			path: ../../../src/level/format/io/leveldb/LevelDB.php

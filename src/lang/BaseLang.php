@@ -49,7 +49,7 @@ class BaseLang{
 	 */
 	public static function getLanguageList(string $path = "") : array{
 		if($path === ""){
-			$path = \pocketmine\PATH . "src/pocketmine/lang/locale/";
+			$path = \pocketmine\RESOURCE_PATH . "locale/";
 		}
 
 		if(is_dir($path)){
@@ -90,7 +90,7 @@ class BaseLang{
 		$this->langName = strtolower($lang);
 
 		if($path === null){
-			$path = \pocketmine\PATH . "src/pocketmine/lang/locale/";
+			$path = \pocketmine\RESOURCE_PATH . "locale/";
 		}
 
 		if(!self::loadLang($file = $path . $this->langName . ".ini", $this->lang)){

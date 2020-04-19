@@ -45,12 +45,12 @@
    },
    "autoload": {
       "psr-4": {
-         "": ["src"]
+         "pocketmine\\": "src/"
       },
       "files": [
-         "src/pocketmine/CoreConstants.php",
-         "src/pocketmine/GlobalConstants.php",
-         "src/pocketmine/VersionInfo.php"
+         "src/CoreConstants.php",
+         "src/GlobalConstants.php",
+         "src/VersionInfo.php"
       ]
    },
    "autoload-dev": {
